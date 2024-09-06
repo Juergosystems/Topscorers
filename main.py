@@ -1,7 +1,9 @@
 from utils import logger
-from services.topscorer import account as acc
+from services import account
 
 logger.setup_logger()
 
-jwt_token = acc.get_jwt_token()
-login_bonus = acc.get_login_bonus(jwt_token)
+acc = account.Account()
+
+login_bonus = acc.get_login_bonus()
+print(login_bonus)
