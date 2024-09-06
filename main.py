@@ -1,5 +1,5 @@
 from utils import logger
-from services import account as acc
+from services.topscorer import account as acc
 
 logger.setup_logger()
 

@@ -135,6 +135,8 @@ dmypy.json
 
 # Credentials
 credentials.txt
+topscorer_credentials.json
+telegram_credentials.json
 
 # Token
 token.txt
