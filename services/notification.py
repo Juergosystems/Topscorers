@@ -8,11 +8,10 @@ from utils import telegram
 from services import account
 from config import Config
 
-
 tlgm = telegram.Telegram()
 acc = account.Account()
 
-class Alerts:
+class Notificaton:
     
     def __init__(self):
         return
