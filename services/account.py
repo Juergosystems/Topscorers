@@ -211,7 +211,7 @@ if __name__ == '__main__':
     # print(acc.get_transfermarket_offers("buying"))
     # print(acc.get_transfermarket_offers("selling"))
     # print(acc.get_player_detail(345819))
-    # print(acc.create_bid(98624347, 8360345, 126735))
+    # print(acc.place_bid(98624347, 126735))
     # print(acc.update_bid(98624347,8360345, 127633))
     # print(acc.delete_bid(98624347,8360345))
     # print(acc.place_offer(310640, 900000))
