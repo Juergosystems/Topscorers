@@ -184,9 +184,9 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def delete_offer(self, transfer_id):
+    def delete_offer(self, offer_id):
         try:
-            url = f'https://topscorers.ch/api/user/transfers/{transfer_id}'
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}'
             print(url)
             request_response = requests.delete(url=url, headers=self.header)
             return request_response.text
@@ -214,5 +214,6 @@ if __name__ == '__main__':
     # print(acc.update_bid(98624347,8360345, 127633))
     # print(acc.delete_bid(98624347,8360345))
     # print(acc.place_offer(310640, 900000))
-    # print(acc.delete_offer(98967235))
     # print(acc.update_offer(98915611, 115000))
+    # print(acc.delete_offer(98967235))
+
