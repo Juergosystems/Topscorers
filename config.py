@@ -9,7 +9,7 @@ class Config:
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json, text/plain, */*'
             }
-        USER_ID =34636
+        USER_ID = 34636
         TEAM_ID = 227092
         LEAGUE_ID = 60198
 
