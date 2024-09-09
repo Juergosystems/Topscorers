@@ -12,7 +12,6 @@ class Account:
 
     def __init__(self):
         try:
-            # Datei credentials.json einlesen
             with open(os.path.join(parent_dir, 'topscorer_credentials.json'), 'r') as file:
                 credentials = json.load(file)
 
@@ -75,8 +74,8 @@ class Account:
             for obj in request_response:
                 new_obj = {
                     "created_at": obj['created_at'],
-                    "user_name": obj['content'][0]['text'],  # Der erste text im content als user_name
-                    "content": ' '.join([item['text'] for item in obj['content']])  # Alle texts im content zusammengefügt
+                    "user_name": obj['content'][0]['text'], 
+                    "content": ' '.join([item['text'] for item in obj['content']])
                 }
                 
                 modified_data.append(new_obj)
