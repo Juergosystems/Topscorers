@@ -5,7 +5,6 @@ sys.path.append(parent_dir)
 
 from utils.logger import logger
 from config import Config as cfg
-from datetime import datetime as dt
 import requests
 import json
 
@@ -19,10 +18,19 @@ class Account:
 
             url = 'https://topscorers.ch/api/login'
             basic_header = cfg.ts.BASIC_HEADERS
-            jwt_token = requests.post(url, json=credentials, headers=basic_header).text
-            basic_header["Authorization"] = f'Bearer {jwt_token}'
+            self.jwt_token = requests.post(url, json=credentials, headers=basic_header).text
+            basic_header["Authorization"] = f'Bearer {self.jwt_token}'
             self.header = basic_header
         
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_account_details(self):
+        try:
+            url = 'https://topscorers.ch/api/user/teams'
+            request_response = requests.get(url, headers=self.header).json()
+            return request_response
+
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
@@ -40,14 +48,43 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def get_account_details(self):
+    def get_regularseason_ranking(self):
         try:
-            url = 'https://topscorers.ch/api/user/teams'
-            request_response = requests.get(url, headers=self.header).json()
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
+            request_response = requests.get(url, headers=self.header).json()["regular_season"]
             return request_response
 
         except Exception as e:
-            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')   
+
+    def get_playoffs_ranking(self):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
+            request_response = requests.get(url, headers=self.header).json()["playoffs"]
+            return request_response
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')   
+
+    def get_league_ticker(self):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ticker'
+            request_response = requests.get(url, headers=self.header).json()["data"]
+            
+            modified_data = []
+            for obj in request_response:
+                new_obj = {
+                    "created_at": obj['created_at'],
+                    "user_name": obj['content'][0]['text'],  # Der erste text im content als user_name
+                    "content": ' '.join([item['text'] for item in obj['content']])  # Alle texts im content zusammengefügt
+                }
+                
+                modified_data.append(new_obj)
+
+            return modified_data
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
 
     def get_roster(self):
         try:
@@ -65,17 +102,118 @@ class Account:
             return request_response
 
         except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
+
+    def get_transfermarket_status(self):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/transfers'
+            request_response = requests.get(url, headers=self.header).json()["meta"]
+            return request_response
+
+        except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
+    def get_transfermarket_offers(self, mode):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/transfers'
+            request_response = requests.get(url, headers=self.header).json()["data"]
+            if mode == "buying":
+                request_response = [item for item in request_response if item["user_id"] != cfg.ts.USER_ID]
+            elif mode == "selling":
+                request_response = [item for item in request_response if item["user_id"] == cfg.ts.USER_ID]
+            return request_response
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_player_detail(self, player_id):
+        try:
+            url = f'https://topscorers.ch/api/players/{player_id}'
+            request_response = requests.get(url, headers=self.header).json()
+            return request_response
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+
+    def place_bid(self, offer_id, price):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers'
+            body = json.dumps({"price": str(price)})
+            request_response = requests.post(url, headers=self.header, data=body)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def update_bid(self, offer_id, bid_id, price):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
+            body = json.dumps({"price": str(price)})
+            request_response = requests.put(url=url, headers=self.header, data=body)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def delete_bid(self, offer_id, bid_id):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
+            request_response = requests.delete(url=url, headers=self.header)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def place_offer(self, player_id, price):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/transfers'
+            body = json.dumps({"player_id": player_id, "price": str(price)})
+            request_response = requests.post(url=url, headers=self.header, data=body)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def update_offer(self, offer_id, price):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}'
+            body = json.dumps({"price": str(price)})
+            request_response = requests.put(url=url, headers=self.header, data=body)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def delete_offer(self, transfer_id):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{transfer_id}'
+            print(url)
+            request_response = requests.delete(url=url, headers=self.header)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
         
 
 if __name__ == '__main__':
 
     acc = Account()
 
-    login_bonus_status = acc.get_login_bonus()
-    print(login_bonus_status)
-
-    print(acc.get_account_details())
-    print(acc.get_roster())
-    print(acc.get_lineup())
+    # print(acc.get_account_details())
+    print(acc.get_login_bonus())
+    # print(acc.get_regularseason_ranking())
+    # print(acc.get_playoffs_ranking())
+    # print(acc.get_league_ticker())
+    # print(acc.get_roster())
+    # print(acc.get_lineup())
+    # print(acc.get_transfermarket_status())
+    # print(acc.get_transfermarket_offers("buying"))
+    # print(acc.get_transfermarket_offers("selling"))
+    # print(acc.get_player_detail(345819))
+    # print(acc.create_bid(98624347, 8360345, 126735))
+    # print(acc.update_bid(98624347,8360345, 127633))
+    # print(acc.delete_bid(98624347,8360345))
+    # print(acc.place_offer(310640, 900000))
+    # print(acc.delete_offer(98967235))
+    # print(acc.update_offer(98915611, 115000))
