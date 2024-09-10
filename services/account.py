@@ -28,6 +28,7 @@ class Account:
         try:
             url = 'https://topscorers.ch/api/user/teams'
             request_response = requests.get(url, headers=self.header).json()
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -39,9 +40,11 @@ class Account:
             request_response = requests.get(url, headers=self.header).json()
             if request_response["bonus"] is not None:
                 logger.info(f'Bonus erfolgreich erhalten.')
+                print("Bonus erfolgreich erhalten.")
                 return "Bonus erfolgreich erhalten."
             else:
                 logger.info(f'Bonus bereits erhalten.')
+                print("Bonus bereits erhalten.")
                 return "Bonus bereits erhalten."
 
         except Exception as e:
@@ -51,6 +54,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
             request_response = requests.get(url, headers=self.header).json()["regular_season"]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -60,6 +64,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
             request_response = requests.get(url, headers=self.header).json()["playoffs"]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -80,6 +85,7 @@ class Account:
                 
                 modified_data.append(new_obj)
 
+            print(modified_data)
             return modified_data
 
         except Exception as e:
@@ -89,6 +95,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["players"]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -98,6 +105,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["lineup"]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -107,6 +115,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/transfers'
             request_response = requests.get(url, headers=self.header).json()["meta"]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -120,6 +129,7 @@ class Account:
                 request_response = [item for item in request_response if item["user_id"] != cfg.ts.USER_ID]
             elif mode == "selling":
                 request_response = [item for item in request_response if item["user_id"] == cfg.ts.USER_ID]
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -129,6 +139,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/players/{player_id}'
             request_response = requests.get(url, headers=self.header).json()
+            print(request_response)
             return request_response
 
         except Exception as e:
@@ -140,6 +151,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers'
             body = json.dumps({"price": str(price)})
             request_response = requests.post(url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -150,6 +162,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
             body = json.dumps({"price": str(price)})
             request_response = requests.put(url=url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -159,6 +172,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
             request_response = requests.delete(url=url, headers=self.header)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -169,6 +183,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/transfers'
             body = json.dumps({"player_id": player_id, "price": str(price)})
             request_response = requests.post(url=url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -179,6 +194,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}'
             body = json.dumps({"price": str(price)})
             request_response = requests.put(url=url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -187,8 +203,19 @@ class Account:
     def delete_offer(self, offer_id):
         try:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}'
-            print(url)
             request_response = requests.delete(url=url, headers=self.header)
+            print(request_response.status_code, request_response.text)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+    
+    def accept_bid(self, offer_id, bid_id, price):
+        try:
+            url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}/accept'
+            body = json.dumps({"price": price})
+            request_response = requests.post(url=url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
             return request_response.text
 
         except Exception as e:
@@ -199,21 +226,22 @@ if __name__ == '__main__':
 
     acc = Account()
 
-    # print(acc.get_account_details())
-    print(acc.get_login_bonus())
-    # print(acc.get_regularseason_ranking())
-    # print(acc.get_playoffs_ranking())
-    # print(acc.get_league_ticker())
-    # print(acc.get_roster())
-    # print(acc.get_lineup())
-    # print(acc.get_transfermarket_status())
-    # print(acc.get_transfermarket_offers("buying"))
-    # print(acc.get_transfermarket_offers("selling"))
-    # print(acc.get_player_detail(345819))
-    # print(acc.place_bid(98624347, 126735))
-    # print(acc.update_bid(98624347,8360345, 127633))
-    # print(acc.delete_bid(98624347,8360345))
-    # print(acc.place_offer(310640, 900000))
-    # print(acc.update_offer(98915611, 115000))
-    # print(acc.delete_offer(98967235))
+    # acc.get_account_details()
+    # acc.get_login_bonus()
+    # acc.get_regularseason_ranking()
+    # acc.get_playoffs_ranking()
+    # acc.get_league_ticker()
+    # acc.get_roster()
+    # acc.get_lineup()
+    # acc.get_transfermarket_status()
+    # acc.get_transfermarket_offers("buying")
+    acc.get_transfermarket_offers("selling")
+    # acc.get_player_detail(345819)
+    # acc.place_bid(98624347, 126735)
+    # acc.update_bid(98624347,8360345, 127633)
+    # acc.delete_bid(98624347,8360345)
+    # acc.place_offer(310640, 900000)
+    # acc.update_offer(98915611, 115000)
+    # acc.delete_offer(98967235)
+    # acc.accept_bid(99136049, 8396053, 350200)
 
