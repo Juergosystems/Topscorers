@@ -5,8 +5,7 @@ from services import automation
 logger.setup_logger()
 
 acc = account.Account()
-ntf = monitoring.Notificaton()
+ntf = monitoring.Monitor()
 atm = automation.Automation()
 
-login_bonus = acc.get_login_bonus()
-print(login_bonus)
+acc.get_login_bonus()
