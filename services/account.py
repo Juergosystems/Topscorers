@@ -16,10 +16,9 @@ class Account:
                 credentials = json.load(file)
 
             url = 'https://topscorers.ch/api/login'
-            basic_header = cfg.ts.BASIC_HEADERS
-            self.jwt_token = requests.post(url, json=credentials, headers=basic_header).text
-            basic_header["Authorization"] = f'Bearer {self.jwt_token}'
-            self.header = basic_header
+            self.header = cfg.ts.BASIC_HEADERS
+            self.jwt_token = requests.post(url, json=credentials, headers=self.header).text
+            self.header["Authorization"] = f'Bearer {self.jwt_token}'
         
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
