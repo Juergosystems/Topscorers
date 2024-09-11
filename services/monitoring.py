@@ -47,7 +47,7 @@ class Monitor:
         return alternative_options
     
     def transfermarket_update(self):
-        update = Fal
+        update = False
         try:
             with open ("../assets/old_transfermarket_offers.json", "r") as json_file:
                 old_offers = json.load(json_file)
