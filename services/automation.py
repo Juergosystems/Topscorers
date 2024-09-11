@@ -5,16 +5,20 @@ sys.path.append(parent_dir)
 
 from utils.logger import logger
 from utils import telegram
-from services import account, notification
+from services import account, monitoring
 from config import Config
 
 tlgm = telegram.Telegram()
 acc = account.Account()
-ntf = notification.Notificaton()
+mnt = monitoring.Monitor()
 
 
 class Automation:
     
     def __init__(self):
         return
+    
+    
+    
+
     

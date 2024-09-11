@@ -49,7 +49,7 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def get_regularseason_ranking(self):
+    def get_manager_ranking(self):
         try:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
             request_response = requests.get(url, headers=self.header).json()["regular_season"]
@@ -58,37 +58,6 @@ class Account:
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')   
-
-    def get_playoffs_ranking(self):
-        try:
-            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
-            request_response = requests.get(url, headers=self.header).json()["playoffs"]
-            print(request_response)
-            return request_response
-
-        except Exception as e:
-            logger.error(f'Ein Fehler ist aufgetreten: {e}')   
-
-    def get_league_ticker(self):
-        try:
-            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ticker'
-            request_response = requests.get(url, headers=self.header).json()["data"]
-            
-            modified_data = []
-            for obj in request_response:
-                new_obj = {
-                    "created_at": obj['created_at'],
-                    "user_name": obj['content'][0]['text'], 
-                    "content": ' '.join([item['text'] for item in obj['content']])
-                }
-                
-                modified_data.append(new_obj)
-
-            print(modified_data)
-            return modified_data
-
-        except Exception as e:
-            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
 
     def get_roster(self):
         try:
@@ -108,7 +77,37 @@ class Account:
             return request_response
 
         except Exception as e:
-            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_teams_ranking(self):
+        try:
+            url = f'https://topscorers.ch/api/rankings'
+            request_response = requests.get(url, headers=self.header).json()
+            print(request_response)
+            return request_response
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')   
+
+    def get_game_schedule(self):
+        try:
+            url = f'https://topscorers.ch/api/games'
+            request_response = requests.get(url, headers=self.header).json()
+            print(request_response)
+            return request_response
+ 
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_next_round_and_live_details(self):
+        try:
+            url = f'https://topscorers.ch/api/live?user_team={cfg.ts.TEAM_ID}&all=1'
+            request_response = requests.get(url, headers=self.header).json()
+            print(request_response)
+            return request_response
+ 
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
     def get_transfermarket_status(self):
         try:
@@ -144,6 +143,26 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
+    def get_league_ticker(self):
+        try:
+            url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ticker'
+            request_response = requests.get(url, headers=self.header).json()["data"]
+            
+            modified_data = []
+            for obj in request_response:
+                new_obj = {
+                    "created_at": obj['created_at'],
+                    "user_name": obj['content'][0]['text'], 
+                    "content": ' '.join([item['text'] for item in obj['content']])
+                }
+                
+                modified_data.append(new_obj)
+
+            print(modified_data)
+            return modified_data
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
 
     def place_bid(self, offer_id, price):
         try:
@@ -227,15 +246,17 @@ if __name__ == '__main__':
 
     # acc.get_account_details()
     # acc.get_login_bonus()
-    # acc.get_regularseason_ranking()
-    # acc.get_playoffs_ranking()
-    # acc.get_league_ticker()
+    # acc.get_manager_ranking()
     # acc.get_roster()
     # acc.get_lineup()
+    # acc.get_teams_ranking()
+    # acc.get_game_schedule()
+    # acc.get_next_round_and_live_details()
     # acc.get_transfermarket_status()
     # acc.get_transfermarket_offers("buying")
-    acc.get_transfermarket_offers("selling")
-    # acc.get_player_detail(345819)
+    # acc.get_transfermarket_offers("selling")
+    acc.get_player_detail(317063)
+    # acc.get_league_ticker()
     # acc.place_bid(98624347, 126735)
     # acc.update_bid(98624347,8360345, 127633)
     # acc.delete_bid(98624347,8360345)

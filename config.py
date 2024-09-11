@@ -17,3 +17,8 @@ class Config:
 
         TELEGRAM_MESSAGE_BLUEPRINT = "{topic} \n \n{body}"
 
+    class ep:
+        HEADERS = {
+            "content-type": 'application/json'
+        }
+

@@ -152,3 +152,6 @@ token.json
 
 #csv Files
 *.csv
+
+#customized Files
+old_transfermarket_offers.json

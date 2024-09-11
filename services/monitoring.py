@@ -1,0 +1,78 @@
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+
+from utils.logger import logger
+from utils import telegram
+from services import account
+from config import Config
+import json
+
+
+tlgm = telegram.Telegram()
+acc = account.Account()
+
+class Monitor:
+    
+    def __init__(self):
+        self.balance = None
+        self.empty_lineup_position_ids = None
+        self.positions_ids_with_alternatives = None
+        self.new_transfermarket_offer_ids = None
+
+        return
+    
+    def negative_balance(self):
+        negative_balance = False
+        self.balance = acc.get_account_details()["data"][0]["budget"]
+        if   self.balance < 0:
+            negative_balance = True
+        return negative_balance
+
+    def missing_player_in_the_lineup(self):
+        missing_player = False
+        lineup = acc.get_lineup()
+        self.empty_lineup_position_ids  = [item['position_id'] for item in lineup if item.get('current') is None]
+        if self.empty_lineup_position_ids:
+            missing_player = True
+        return missing_player
+    
+    def alternative_lineup_option(self):
+        alternative_options = False
+        lineup = acc.get_lineup()
+        positions_ids_with_alternatives = [item['position_id'] for item in lineup if item.get('available') is not None]
+        if positions_ids_with_alternatives:
+            alternative_options = True
+        return alternative_options
+    
+    def transfermarket_update(self):
+        update = Fal
+        try:
+            with open ("../assets/old_transfermarket_offers.json", "r") as json_file:
+                old_offers = json.load(json_file)
+        except FileNotFoundError:
+            old_offers = None
+        
+        if old_offers is not None:
+            old_offer_ids = [item['id'] for item in old_offers]
+        else:
+            old_offer_ids = []
+
+        actual_offers = acc.get_transfermarket_offers("buying")
+        actual_offer_ids = [item['id'] for item in actual_offers]
+        self.new_transfermarket_offer_ids = list(set(actual_offer_ids)-set(old_offer_ids))
+
+        if any(actual_offer_id not in old_offer_ids for actual_offer_id in actual_offer_ids):
+            update = True
+            with open("../assets/old_transfermarket_offers.json", 'w') as json_file:
+                json.dump(actual_offers, json_file, indent=4)
+        return update
+
+if __name__ == '__main__':
+    
+    mnt = Monitor()
+    # print(mnt.negative_balance())
+    # print(mnt.missing_player_in_the_lineup())
+    # print(mnt.alternative_lineup_option())
+    # print(mnt.transfermarket_update())
