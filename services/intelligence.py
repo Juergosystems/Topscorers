@@ -130,6 +130,6 @@ if __name__ == '__main__':
 
     intl = Intelligence()
 
-    # print(intl.get_elite_procspect_details("Nils Bächler", [2023, 2024]))
-    print(intl.get_player_scores([317063]))
+    print(intl.get_elite_procspect_details("Nils Bächler", [2023, 2024]))
+    # print(intl.get_player_scores([317063]))
 
