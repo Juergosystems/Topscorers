@@ -69,7 +69,7 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def get_lineup(self):
+    def get_lineup_overview(self):
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["lineup"]
@@ -78,6 +78,30 @@ class Account:
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
+        
+    def get_current_lineup(self):
+        try:
+            url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
+            request_response = requests.get(url, headers=self.header).json()["data"]["lineup"]
+            current_lineup = {
+                "players": {str(item['position_id']): item['current'] for item in request_response}
+                    }
+            print(current_lineup)
+            return current_lineup
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
+
+    def update_lineup(self, new_lineup):
+        try:
+            url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}/lineup'
+            body = json.dumps(new_lineup)
+            request_response = requests.post(url=url, headers=self.header, data=body)
+            print(request_response.status_code, request_response.text)
+            return request_response.text
+
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}') 
 
     def get_teams_ranking(self):
         try:
@@ -248,14 +272,16 @@ if __name__ == '__main__':
     # acc.get_login_bonus()
     # acc.get_manager_ranking()
     # acc.get_roster()
-    # acc.get_lineup()
+    # acc.get_lineup_overview()
+    acc.get_current_lineup()
+    # acc.update_lineup()
     # acc.get_teams_ranking()
     # acc.get_game_schedule()
     # acc.get_next_round_and_live_details()
     # acc.get_transfermarket_status()
     # acc.get_transfermarket_offers("buying")
     # acc.get_transfermarket_offers("selling")
-    acc.get_player_detail(317063)
+    # acc.get_player_detail(317063)
     # acc.get_league_ticker()
     # acc.place_bid(98624347, 126735)
     # acc.update_bid(98624347,8360345, 127633)
