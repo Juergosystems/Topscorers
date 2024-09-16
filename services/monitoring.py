@@ -32,7 +32,7 @@ class Monitor:
 
     def missing_player_in_the_lineup(self):
         missing_player = False
-        lineup = acc.get_lineup()
+        lineup = acc.get_lineup_details()
         self.empty_lineup_position_ids  = [item['position_id'] for item in lineup if item.get('current') is None]
         if self.empty_lineup_position_ids:
             missing_player = True
@@ -40,7 +40,7 @@ class Monitor:
     
     def alternative_lineup_option(self):
         alternative_options = False
-        lineup = acc.get_lineup()
+        lineup = acc.get_lineup_details()
         positions_ids_with_alternatives = [item['position_id'] for item in lineup if item.get('available') is not None]
         if positions_ids_with_alternatives:
             alternative_options = True

@@ -13,9 +13,13 @@ class Config:
         TEAM_ID = 227092
         LEAGUE_ID = 60198
 
+    class atm:
+
+        ALERT_OFFSET = 3600 # time in seconds till the next round to trigger alert
+
     class ms:
 
-        TELEGRAM_MESSAGE_BLUEPRINT = "{topic} \n \n{body}"
+        TELEGRAM_MESSAGE_BLUEPRINT = "*{topic}* \n \n{body}"
 
     class ep:
         HEADERS = {

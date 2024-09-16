@@ -7,6 +7,7 @@ from utils.logger import logger
 from config import Config as cfg
 import requests
 import json
+from datetime import datetime as dt, timedelta
 
 class Account:
 
@@ -25,7 +26,7 @@ class Account:
 
     def get_account_details(self):
         try:
-            url = 'https://topscorers.ch/api/user/teams'
+            url = 'https://topscorers.ch/api/user'
             request_response = requests.get(url, headers=self.header).json()
             print(request_response)
             return request_response
@@ -38,6 +39,10 @@ class Account:
             url = 'https://topscorers.ch/api/user/teams'
             request_response = requests.get(url, headers=self.header).json()
             if request_response["bonus"] is not None:
+                last_bonus = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
+                with open("../assets/last_bonus.json", 'w') as json_file:
+                    json.dump(last_bonus, json_file, indent=4)
+                self.last_login_bonus = dt.now().date()
                 logger.info(f'Bonus erfolgreich erhalten.')
                 print("Bonus erfolgreich erhalten.")
                 return "Bonus erfolgreich erhalten."
@@ -48,6 +53,12 @@ class Account:
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_last_bonus_date(self):
+        with open ("../assets/last_bonus.json", "r") as json_file:
+            last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y") )
+            print(last_bonus_date)
+            return last_bonus_date
 
     def get_manager_ranking(self):
         try:
@@ -69,7 +80,7 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def get_lineup_overview(self):
+    def get_lineup_details(self):
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["lineup"]
@@ -97,8 +108,9 @@ class Account:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}/lineup'
             body = json.dumps(new_lineup)
             request_response = requests.post(url=url, headers=self.header, data=body)
-            print(request_response.status_code, request_response.text)
-            return request_response.text
+            print(request_response.status_code, json.dumps(request_response.json()["meta"]["status"]))
+            logger.info(request_response.json()["meta"]["status"])
+            return json.dumps(request_response.json()["meta"]["status"])
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}') 
@@ -123,10 +135,36 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    def get_next_round_and_live_details(self):
+    def get_next_round(self, mode="date"):
         try:
             url = f'https://topscorers.ch/api/live?user_team={cfg.ts.TEAM_ID}&all=1'
             request_response = requests.get(url, headers=self.header).json()
+            next_round = (dt.strptime(str(request_response["next_live_date"]), "%Y-%m-%dT%H:%M:%S.%fZ") + timedelta(hours=2))
+            count_down = request_response["next_live_in_seconds"]
+            print(next_round)
+            print(count_down)
+            if mode == "countdown":
+                return count_down
+            else:
+                return next_round
+ 
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_live_lineup(self):
+        try:
+            url = f'https://topscorers.ch/api/live?user_team={cfg.ts.TEAM_ID}&all=1'
+            request_response = requests.get(url, headers=self.header).json()["players"]
+            print(request_response)
+            return request_response
+ 
+        except Exception as e:
+            logger.error(f'Ein Fehler ist aufgetreten: {e}')
+
+    def get_live_results(self):
+        try:
+            url = f'https://topscorers.ch/api/live?user_team={cfg.ts.TEAM_ID}&all=1'
+            request_response = requests.get(url, headers=self.header).json()["games"]
             print(request_response)
             return request_response
  
@@ -270,14 +308,18 @@ if __name__ == '__main__':
 
     # acc.get_account_details()
     # acc.get_login_bonus()
+    acc.get_last_bonus_date()
     # acc.get_manager_ranking()
     # acc.get_roster()
-    # acc.get_lineup_overview()
-    acc.get_current_lineup()
-    # acc.update_lineup()
+    # acc.get_lineup_details()
+    # lineup = acc.get_current_lineup()
+    # acc.update_lineup(lineup)
     # acc.get_teams_ranking()
     # acc.get_game_schedule()
-    # acc.get_next_round_and_live_details()
+    # acc.get_next_round(mode="date")
+    # acc.get_next_round(mode="countdown")
+    # acc.get_live_lineup()
+    # acc.get_live_results()
     # acc.get_transfermarket_status()
     # acc.get_transfermarket_offers("buying")
     # acc.get_transfermarket_offers("selling")

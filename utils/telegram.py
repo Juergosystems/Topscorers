@@ -23,7 +23,7 @@ class Telegram:
     def send_message(self, topic, body):
         try:
             push_message = cfg.ms.TELEGRAM_MESSAGE_BLUEPRINT.format(topic=topic, body=body)
-            url=f"https://api.telegram.org/bot{self.credentials['token']}/sendMessage?chat_id={self.credentials['chatId']}&text={push_message}"
+            url=f"https://api.telegram.org/bot{self.credentials['token']}/sendMessage?chat_id={self.credentials['chatId']}&text={push_message}&parse_mode=Markdown"
             return requests.get(url).json()
         
         except Exception as e:
