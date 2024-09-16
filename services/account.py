@@ -38,11 +38,11 @@ class Account:
         try:
             url = 'https://topscorers.ch/api/user/teams'
             request_response = requests.get(url, headers=self.header).json()
+            last_bonus = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
+            with open("../assets/last_bonus.json", 'w') as json_file:
+                json.dump(last_bonus, json_file, indent=4)
+            self.last_login_bonus = dt.now().date()
             if request_response["bonus"] is not None:
-                last_bonus = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
-                with open("../assets/last_bonus.json", 'w') as json_file:
-                    json.dump(last_bonus, json_file, indent=4)
-                self.last_login_bonus = dt.now().date()
                 logger.info(f'Bonus erfolgreich erhalten.')
                 print("Bonus erfolgreich erhalten.")
                 return "Bonus erfolgreich erhalten."
@@ -70,10 +70,13 @@ class Account:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')   
 
-    def get_roster(self):
+    def get_roster(self, mode=None):
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["players"]
+            if mode == "player_ids":
+                request_response = [player['id'] for player in request_response]
+        
             print(request_response)
             return request_response
 
@@ -189,7 +192,7 @@ class Account:
                 request_response = [item for item in request_response if item["user_id"] != cfg.ts.USER_ID]
             elif mode == "selling":
                 request_response = [item for item in request_response if item["user_id"] == cfg.ts.USER_ID]
-            print(request_response)
+            # print(request_response)
             return request_response
 
         except Exception as e:
@@ -199,7 +202,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/players/{player_id}'
             request_response = requests.get(url, headers=self.header).json()
-            print(request_response)
+            # print(request_response)
             return request_response
 
         except Exception as e:
@@ -308,9 +311,10 @@ if __name__ == '__main__':
 
     # acc.get_account_details()
     # acc.get_login_bonus()
-    acc.get_last_bonus_date()
-    # acc.get_manager_ranking()
+    # acc.get_last_bonus_date()
+    # acc.get_manager_ranking()   
     # acc.get_roster()
+    # acc.get_roster(mode="player_ids")
     # acc.get_lineup_details()
     # lineup = acc.get_current_lineup()
     # acc.update_lineup(lineup)
@@ -321,9 +325,9 @@ if __name__ == '__main__':
     # acc.get_live_lineup()
     # acc.get_live_results()
     # acc.get_transfermarket_status()
-    # acc.get_transfermarket_offers("buying")
+    acc.get_transfermarket_offers("buying")
     # acc.get_transfermarket_offers("selling")
-    # acc.get_player_detail(317063)
+    acc.get_player_detail(317063)
     # acc.get_league_ticker()
     # acc.place_bid(98624347, 126735)
     # acc.update_bid(98624347,8360345, 127633)

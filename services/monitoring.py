@@ -20,6 +20,7 @@ class Monitor:
         self.empty_lineup_position_ids = None
         self.positions_ids_with_alternatives = None
         self.new_transfermarket_offer_ids = None
+        self.new_player_ids = None
 
         return
     
@@ -60,8 +61,12 @@ class Monitor:
             old_offer_ids = []
 
         actual_offers = acc.get_transfermarket_offers("buying")
+        # print(actual_offers)
         actual_offer_ids = [item['id'] for item in actual_offers]
         self.new_transfermarket_offer_ids = list(set(actual_offer_ids)-set(old_offer_ids))
+
+        filtered_offers = [objekt for objekt in actual_offers if objekt['id'] in self.new_transfermarket_offer_ids]
+        self.new_player_ids = [obj["player"]["id"] for obj in filtered_offers]
 
         if any(actual_offer_id not in old_offer_ids for actual_offer_id in actual_offer_ids):
             update = True
@@ -76,3 +81,4 @@ if __name__ == '__main__':
     # print(mnt.missing_player_in_the_lineup())
     # print(mnt.alternative_lineup_option())
     # print(mnt.transfermarket_update())
+    # print(mnt.new_player_ids)

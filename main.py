@@ -4,8 +4,8 @@ from services import automation
 
 logger.setup_logger()
 
-acc = account.Account()
-ntf = monitoring.Monitor()
 atm = automation.Automation()
 
-acc.get_login_bonus()
+atm.bonus_handler(mode="automated")
+atm.balance_handler(mode="info")
+atm.lineup_handler(mode="automated")

@@ -5,7 +5,7 @@ sys.path.append(parent_dir)
 
 from utils.logger import logger
 from utils import telegram
-from services import account, monitoring
+from services import account, monitoring, intelligence
 from config import Config as cfg
 from datetime import datetime as dt
 import json
@@ -13,6 +13,7 @@ import json
 tlgm = telegram.Telegram()
 acc = account.Account()
 mnt = monitoring.Monitor()
+intl = intelligence.Intelligence()
 
 
 class Automation:
@@ -25,10 +26,10 @@ class Automation:
         if acc.get_last_bonus_date().date() < dt.now().date():
 
             if mode == "automated":
-                    acc.get_login_bonus()
-                    topic = "Login Bonus Received!"
-                    body = f'You have received the login bonus for today {dt.now().strftime("%d.%m.%Y")}.'
-                    tlgm.send_message(topic, body)
+                    if acc.get_login_bonus() == 'Bonus erfolgreich erhalten.':
+                        topic = "Login Bonus Received!"
+                        body = f'You have received the login bonus for today {dt.now().strftime("%d.%m.%Y")}.'
+                        tlgm.send_message(topic, body)
 
             else:
                     topic = "Login Bonus Reminder!"
@@ -57,12 +58,18 @@ class Automation:
         next_round = acc.get_next_round(mode="date")
         count_down = acc.get_next_round(mode="countdown")
 
+        recommended_lineup = intl.get_line_up_reccomendation()
+
         if (mnt.missing_player_in_the_lineup() and count_down <= cfg.atm.ALERT_OFFSET):            
             if mode == "automated":
-                print("No automated handling implemented yet.")
+                acc.update_lineup(recommended_lineup[0])
+                topic = "Lineup Updated!"
+                body = f'The lineup has been updated to: \n{recommended_lineup[1]["players"]}'
+                tlgm.send_message(topic, body)
+
             else:
                 topic = "Missing Player!"
-                body = f'You are missing at least one player in your lineup for the next round starting {next_round.strftime("%d.%m.%Y")} {next_round.strftime("%H:%M")}.'
+                body = f'You are missing at least one player in your lineup for the next round starting {next_round.strftime("%d.%m.%Y")} {next_round.strftime("%H:%M")}. \n\nI have the following recommendation for you: \n{recommended_lineup[1]["players"]}'
                 tlgm.send_message(topic, body)
 
         else:
@@ -70,6 +77,21 @@ class Automation:
         
 
     def transfermarket_handler(self, mode="info"):
+
+        if (mnt.transfermarket_update()):
+            print(mnt.new_transfermarket_offer_ids)
+            score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
+            print(score_table)
+
+            if mode == "automated":
+                print("No automated handling implemented yet.")
+            else:
+                return
+
+        else:
+            return
+
+
         return
 
 
@@ -87,6 +109,8 @@ if __name__ == '__main__':
 
     # atm.lineup_handler(mode="info")
     # atm.lineup_handler(mode="automated")
+
+    atm.transfermarket_handler(mode="automated")
     
 
     
