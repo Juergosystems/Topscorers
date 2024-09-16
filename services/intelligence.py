@@ -199,7 +199,6 @@ class Intelligence:
         defencemen = [player for player in score_table if player["position"] == "Defenceman"]
         forwards = [player for player in score_table if player["position"] == "Forward"]
 
-        # Sortiere jede Gruppe nach dem Score
         goalies_sorted = sorted(goalies, key=lambda x: x["score"], reverse=True)
         defencemen_sorted = sorted(defencemen, key=lambda x: x["score"], reverse=True)
         forwards_sorted = sorted(forwards, key=lambda x: x["score"], reverse=True)
