@@ -19,7 +19,9 @@ intl = intelligence.Intelligence()
 class Automation:
     
     def __init__(self):
-        return
+
+        self.next_round = acc.get_next_round(mode="date")
+        self.count_down = acc.get_next_round(mode="countdown")
     
     def bonus_handler(self, mode="info"):
 
@@ -38,16 +40,13 @@ class Automation:
 
     
     def balance_handler(self, mode="info"):
-
-        next_round = acc.get_next_round(mode="date")
-        count_down = acc.get_next_round(mode="countdown")
         
-        if (mnt.negative_balance() and count_down <= cfg.atm.ALERT_OFFSET):
+        if (mnt.negative_balance() and self.count_down <= cfg.atm.ALERT_OFFSET):
             if mode == "automated":
                 print("No automated handling implemented yet.")
             else:
                 topic = "Negative Balance!"
-                body = f'Your account balance is negative. Please sell a player to be ready for the next round starting {next_round.strftime("%d.%m.%Y")} {next_round.strftime("%H:%M")}.'
+                body = f'Your account balance is negative. Please sell a player to be ready for the next round starting {self.next_round.strftime("%d.%m.%Y")} {self.next_round.strftime("%H:%M")}.'
                 tlgm.send_message(topic, body)
         else:
             return
@@ -55,12 +54,9 @@ class Automation:
 
     def lineup_handler(self, mode="info"):
         
-        next_round = acc.get_next_round(mode="date")
-        count_down = acc.get_next_round(mode="countdown")
-
         recommended_lineup = intl.get_line_up_reccomendation()
 
-        if (mnt.missing_player_in_the_lineup() and count_down <= cfg.atm.ALERT_OFFSET):            
+        if (mnt.missing_player_in_the_lineup() and self.count_down <= cfg.atm.ALERT_OFFSET):            
             if mode == "automated":
                 acc.update_lineup(recommended_lineup[0])
                 topic = "Lineup Updated!"
@@ -69,7 +65,7 @@ class Automation:
 
             else:
                 topic = "Missing Player!"
-                body = f'You are missing at least one player in your lineup for the next round starting {next_round.strftime("%d.%m.%Y")} {next_round.strftime("%H:%M")}. \n\nI have the following recommendation for you: \n{recommended_lineup[1]["players"]}'
+                body = f'You are missing at least one player in your lineup for the next round starting {self.next_round.strftime("%d.%m.%Y")} {self.next_round.strftime("%H:%M")}. \n\nI have the following recommendation for you: \n{recommended_lineup[1]["players"]}'
                 tlgm.send_message(topic, body)
 
         else:

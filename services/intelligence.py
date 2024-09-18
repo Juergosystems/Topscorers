@@ -119,7 +119,7 @@ class Intelligence:
         eliteprospect_id = search_response[0]["id"]
         url_details = f'https://gql.eliteprospects.com/?operationName=PlayerStatisticDefault&variables={{"player":"{eliteprospect_id}","leagueType":"league","sort":"season"}}&extensions={{"persistedQuery":{{"version":1,"sha256Hash":"922817a06790cfca6ead3f987d2da2a7d5213eca323f574bec51305d9582d602"}}}}'
         eliteprospect_details = requests.get(url_details, headers=cfg.ep.HEADERS).json()
-        print(eliteprospect_details)
+        # print(eliteprospect_details)
         excluded_leagues = ["International", "WC", "WJC-20", "International-Jr"]
         print(player_name)
         for s in range(0, len(season_end_year)):
