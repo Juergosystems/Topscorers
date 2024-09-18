@@ -94,7 +94,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/teams/{cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()["data"]["lineup"]
-            print(request_response)
+            # print(request_response)
             return request_response
 
         except Exception as e:
