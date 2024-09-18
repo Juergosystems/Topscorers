@@ -27,7 +27,7 @@ class Intelligence:
             player_details = acc.get_player_detail(player_id)
             # print(player_details)
             name = player_details["data"]["firstname"] + " " + player_details["data"]["lastname"]
-            previous_season_ep = self.__get_elite_procspect_details(name)
+            previous_season_ep = self._get_elite_procspect_details(name)
 
             # rank = player_details["data"]["rank"]
             # team_id = player_details["data"]["team"]["id"]

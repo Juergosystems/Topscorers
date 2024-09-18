@@ -26,7 +26,7 @@ class Account:
 
     def get_account_details(self):
         try:
-            url = 'https://topscorers.ch/api/user'
+            url = 'https://topscorers.ch/api/user/teams?team={cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()
             print(request_response)
             return request_response
@@ -55,15 +55,15 @@ class Account:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
     def get_last_bonus_date(self):
-        with open ("../assets/last_bonus.json", "r") as json_file:
-            last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y") )
+        with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "r") as json_file:
+            last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y"))
             print(last_bonus_date)
             return last_bonus_date
 
     def get_manager_ranking(self):
         try:
             url = f'https://topscorers.ch/api/user/leagues/{cfg.ts.LEAGUE_ID}/ranking'
-            request_response = requests.get(url, headers=self.header).json()["regular_season"]
+            request_response = requests.get(url, headers=self.header).json()["data"]
             print(request_response)
             return request_response
 
@@ -309,7 +309,7 @@ if __name__ == '__main__':
 
     acc = Account()
 
-    # acc.get_account_details()
+    acc.get_account_details()
     # acc.get_login_bonus()
     # acc.get_last_bonus_date()
     # acc.get_manager_ranking()   
@@ -325,9 +325,9 @@ if __name__ == '__main__':
     # acc.get_live_lineup()
     # acc.get_live_results()
     # acc.get_transfermarket_status()
-    acc.get_transfermarket_offers("buying")
+    # acc.get_transfermarket_offers("buying")
     # acc.get_transfermarket_offers("selling")
-    acc.get_player_detail(317063)
+    # acc.get_player_detail(317063)
     # acc.get_league_ticker()
     # acc.place_bid(98624347, 126735)
     # acc.update_bid(98624347,8360345, 127633)
