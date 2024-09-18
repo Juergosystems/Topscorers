@@ -107,7 +107,7 @@ class Account:
             current_lineup = {
                 "players": {str(item['position_id']): item['current'] for item in request_response}
                     }
-            print(current_lineup)
+            print("current lineup: ", current_lineup)
             return current_lineup
 
         except Exception as e:
