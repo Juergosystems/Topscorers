@@ -28,7 +28,7 @@ class Account:
         try:
             url = 'https://topscorers.ch/api/user/teams?team={cfg.ts.TEAM_ID}'
             request_response = requests.get(url, headers=self.header).json()
-            print(request_response)
+            # print(request_response)
             return request_response
 
         except Exception as e:
@@ -57,15 +57,15 @@ class Account:
     def get_last_bonus_date(self):
         try:
             with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "r") as json_file:
-                last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y"))
-                print(last_bonus_date)
+                last_bonus = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y"))
+                print("Last bonus ",last_bonus)
         except FileNotFoundError:
             last_bonus = dt.now()-timedelta(days=1)
             last_bonus_date = {"last_bonus": last_bonus.strftime("%d.%m.%Y")}
             with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "w") as json_file:
                 json.dump(last_bonus_date, json_file, indent=4)
 
-                return last_bonus
+        return last_bonus
 
     def get_manager_ranking(self):
         try:
@@ -151,11 +151,12 @@ class Account:
             request_response = requests.get(url, headers=self.header).json()
             next_round = (dt.strptime(str(request_response["next_live_date"]), "%Y-%m-%dT%H:%M:%S.%fZ") + timedelta(hours=2))
             count_down = request_response["next_live_in_seconds"]
-            print(next_round)
-            print(count_down)
+            
             if mode == "countdown":
+                print("count down: ", count_down)
                 return count_down
             else:
+                print("next round: ",next_round)
                 return next_round
  
         except Exception as e:
