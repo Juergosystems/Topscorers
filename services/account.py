@@ -38,9 +38,9 @@ class Account:
         try:
             url = 'https://topscorers.ch/api/user/teams'
             request_response = requests.get(url, headers=self.header).json()
-            last_bonus = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
-            with open("../assets/last_bonus.json", 'w') as json_file:
-                json.dump(last_bonus, json_file, indent=4)
+            last_bonus_date = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
+            with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "w") as json_file:
+                json.dump(last_bonus_date, json_file, indent=4)
             self.last_login_bonus = dt.now().date()
             if request_response["bonus"] is not None:
                 logger.info(f'Bonus erfolgreich erhalten.')
@@ -55,10 +55,17 @@ class Account:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
     def get_last_bonus_date(self):
-        with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "r") as json_file:
-            last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y"))
-            print(last_bonus_date)
-            return last_bonus_date
+        try:
+            with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "r") as json_file:
+                last_bonus_date = dt.strptime(json.load(json_file)["last_bonus"], ("%d.%m.%Y"))
+                print(last_bonus_date)
+        except FileNotFoundError:
+            last_bonus = dt.now()-timedelta(days=1)
+            last_bonus_date = {"last_bonus": last_bonus.strftime("%d.%m.%Y")}
+            with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "w") as json_file:
+                json.dump(last_bonus_date, json_file, indent=4)
+
+                return last_bonus
 
     def get_manager_ranking(self):
         try:
