@@ -17,6 +17,7 @@ class Config:
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json, text/plain, */*'
             }
+        
         USER_ID = credentials['user_id']
         TEAM_ID = credentials['team_id']
         LEAGUE_ID = credentials['league_id']
