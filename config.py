@@ -23,6 +23,7 @@ class Config:
         LEAGUE_ID = credentials['league_id']
 
     class intl:
+        
         CURRENT_SEASON_SOCRING_WEIGHT = 10 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
 
     class atm:
@@ -34,6 +35,7 @@ class Config:
         TELEGRAM_MESSAGE_BLUEPRINT = "*{topic}* \n \n{body}"
 
     class ep:
+        
         HEADERS = {
             "content-type": 'application/json'
         }
