@@ -56,7 +56,7 @@ class Automation:
         
         recommended_lineup = intl.get_line_up_reccomendation()
 
-        if (mnt.missing_player_in_the_lineup() and self.count_down <= cfg.atm.ALERT_OFFSET):            
+        if (mnt.missing_player_in_the_lineup() or self.count_down <= cfg.atm.ALERT_OFFSET):            
             if mode == "automated":
                 acc.update_lineup(recommended_lineup[0])
                 topic = "Lineup Updated!"
