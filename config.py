@@ -1,3 +1,11 @@
+import json
+
+def load_credentials():
+    with open("topscorer_credentials.json", 'r') as file:
+        return json.load(file)
+
+credentials = load_credentials()
+
 class Config:
 
     class ts:
@@ -9,11 +17,13 @@ class Config:
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json, text/plain, */*'
             }
-        USER_ID = 34636
-        TEAM_ID = 227092
-        LEAGUE_ID = 60198
+        
+        USER_ID = credentials['user_id']
+        TEAM_ID = credentials['team_id']
+        LEAGUE_ID = credentials['league_id']
 
     class intl:
+        
         CURRENT_SEASON_SOCRING_WEIGHT = 10 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
 
     class atm:
@@ -25,6 +35,7 @@ class Config:
         TELEGRAM_MESSAGE_BLUEPRINT = "*{topic}* \n \n{body}"
 
     class ep:
+        
         HEADERS = {
             "content-type": 'application/json'
         }
