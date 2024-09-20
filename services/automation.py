@@ -54,18 +54,33 @@ class Automation:
 
     def lineup_handler(self, mode="info"):
         
+        current_lineup = acc.get_current_lineup()
         recommended_lineup = intl.get_line_up_reccomendation()
+
+        players_out = {}
+        players_in = {}
+
+        for key, value in current_lineup[1]["players"].items():
+            if value not in recommended_lineup[1]["players"].values():
+                players_out[key] = value
+
+        for key, value in recommended_lineup[1]["players"].items():
+            if value not in current_lineup[1]["players"].values():
+                players_in[key] = value
+
+        if not players_out and not players_in:
+            return
 
         if (mnt.missing_player_in_the_lineup() or self.count_down <= cfg.atm.ALERT_OFFSET):            
             if mode == "automated":
                 acc.update_lineup(recommended_lineup[0])
                 topic = "Lineup Updated!"
-                body = f'The lineup has been updated to: \n{recommended_lineup[1]["players"]}'
+                body = "Players out: \n" + "\n".join([f" •  {players_out[key]}" for key in players_out]) + "\n\nPlayers in: \n" + "\n".join([f" •  {players_in[key]}" for key in players_in])
                 tlgm.send_message(topic, body)
 
             else:
-                topic = "Missing Player!"
-                body = f'You are missing at least one player in your lineup for the next round starting {self.next_round.strftime("%d.%m.%Y")} {self.next_round.strftime("%H:%M")}. \n\nI have the following recommendation for you: \n{recommended_lineup[1]["players"]}'
+                topic = "Lineup Recommendation"
+                body = "Players out: \n" + "\n".join([f" •  {players_out[key]}" for key in players_out]) + "\n\nPlayers in: \n" + "\n".join([f" •  {players_in[key]}" for key in players_in])
                 tlgm.send_message(topic, body)
 
         else:
@@ -104,9 +119,9 @@ if __name__ == '__main__':
     # atm.balance_handler(mode="automated")
 
     # atm.lineup_handler(mode="info")
-    # atm.lineup_handler(mode="automated")
+    atm.lineup_handler(mode="automated")
 
-    atm.transfermarket_handler(mode="automated")
+    # atm.transfermarket_handler(mode="automated")
     
 
     

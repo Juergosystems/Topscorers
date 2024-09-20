@@ -24,11 +24,11 @@ class Config:
 
     class intl:
         
-        CURRENT_SEASON_SOCRING_WEIGHT = 10 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
+        CURRENT_SEASON_SOCRING_WEIGHT = 5 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
 
     class atm:
 
-        ALERT_OFFSET = 360000 # time in seconds till the next round to trigger alert
+        ALERT_OFFSET = 3600 # time in seconds till the next round to trigger alert
 
     class ms:
 

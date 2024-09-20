@@ -121,7 +121,7 @@ class Intelligence:
         eliteprospect_details = requests.get(url_details, headers=cfg.ep.HEADERS).json()
         # print(eliteprospect_details)
         excluded_leagues = ["International", "WC", "WJC-20", "International-Jr"]
-        print(player_name)
+        # print(player_name)
         for s in range(0, len(season_end_year)):
             last_club_season = [edge for edge in eliteprospect_details["data"]["playerStats"]["edges"] if edge["season"]["endYear"] == season_end_year[s] and edge["leagueName"] not in excluded_leagues]
             for i in range(0, len(last_club_season)):
@@ -199,6 +199,8 @@ class Intelligence:
         defencemen = [player for player in score_table if player["position"] == "Defenceman"]
         forwards = [player for player in score_table if player["position"] == "Forward"]
 
+        print(defencemen)
+
         goalies_sorted = sorted(goalies, key=lambda x: x["score"], reverse=True)
         defencemen_sorted = sorted(defencemen, key=lambda x: x["score"], reverse=True)
         forwards_sorted = sorted(forwards, key=lambda x: x["score"], reverse=True)
@@ -245,12 +247,12 @@ if __name__ == '__main__':
     intl = Intelligence()
     acc = account.Account()
 
-    print(intl._get_elite_procspect_details("noah patenaude", [2023, 2024]))
+    # print(intl._get_elite_procspect_details("noah patenaude", [2023, 2024]))
     
     # print(intl.get_player_scores([149071]))
 
     # print(intl.get_player_scores(acc.get_roster(mode="player_ids"), mode="efficiency"))
     # print(intl.get_player_scores(acc.get_roster(mode="player_ids"), mode="performance"))
     
-    # print(intl.get_line_up_reccomendation())
+    print(intl.get_line_up_reccomendation())
 
