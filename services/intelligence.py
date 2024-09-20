@@ -105,8 +105,15 @@ class Intelligence:
                     "position": position,
                     "score": score
             }
+
             score_table.append(scoring_details)
 
+        live_lineup = self._get_live_lineup()
+        for item in score_table:
+            if item["id"] in live_lineup:
+                item["inLineup"] = True
+            else:
+                item["inLineup"] = False
 
         return score_table
 
@@ -188,6 +195,30 @@ class Intelligence:
 
 
         return player_details
+    
+
+    def _get_live_lineup(self):
+
+        games_url = f'https://www.nationalleague.ch/api/games/current?lang=de-CH'
+        games = requests.get(games_url, headers=cfg.nl.HEADERS).json()
+        game_ids = [game["gameId"] for game in games]
+        
+        live_lineup_player_ids = []
+        for game_id in game_ids:
+            game_details_url = f'https://www.nationalleague.ch/api/games/{game_id}?lang=de-CH'
+            game_details = requests.get(game_details_url, headers=cfg.nl.HEADERS).json()
+         
+            for lineup in game_details["lineupHome"]:
+                for player in lineup["players"]:
+                    live_lineup_player_ids.append(int(player["playerId"]))
+
+            # Spieler in lineupAway durchsuchen
+            for lineup in game_details["lineupAway"]:
+                for player in lineup["players"]:
+                    live_lineup_player_ids.append(int(player["playerId"]))
+
+        return live_lineup_player_ids  
+
             
     def get_line_up_reccomendation(self):
         mode="performance"
@@ -199,11 +230,9 @@ class Intelligence:
         defencemen = [player for player in score_table if player["position"] == "Defenceman"]
         forwards = [player for player in score_table if player["position"] == "Forward"]
 
-        print(defencemen)
-
-        goalies_sorted = sorted(goalies, key=lambda x: x["score"], reverse=True)
-        defencemen_sorted = sorted(defencemen, key=lambda x: x["score"], reverse=True)
-        forwards_sorted = sorted(forwards, key=lambda x: x["score"], reverse=True)
+        goalies_sorted = sorted(goalies, key=lambda x: (not x["inLineup"], -x["score"]))
+        defencemen_sorted = sorted(defencemen, key=lambda x: (not x["inLineup"], -x["score"]))
+        forwards_sorted = sorted(forwards, key=lambda x: (not x["inLineup"], -x["score"]))
 
         best_goalie_id = [goalies_sorted[0]["id"]] if goalies_sorted else []
         best_defencemen_ids = [player["id"] for player in defencemen_sorted[:6]]
@@ -248,8 +277,10 @@ if __name__ == '__main__':
     acc = account.Account()
 
     # print(intl._get_elite_procspect_details("noah patenaude", [2023, 2024]))
+
+    # print(intl._get_live_lineup())
     
-    # print(intl.get_player_scores([149071]))
+    # print(intl.get_player_scores([149134]))
 
     # print(intl.get_player_scores(acc.get_roster(mode="player_ids"), mode="efficiency"))
     # print(intl.get_player_scores(acc.get_roster(mode="player_ids"), mode="performance"))
