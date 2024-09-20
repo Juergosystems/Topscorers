@@ -50,7 +50,7 @@ class Monitor:
     def transfermarket_update(self):
         update = False
         try:
-            with open ("../assets/old_transfermarket_offers.json", "r") as json_file:
+            with open(os.path.join(parent_dir, 'assets/old_transfermarket_offers.json'), 'r') as json_file:
                 old_offers = json.load(json_file)
         except FileNotFoundError:
             old_offers = None
@@ -70,7 +70,7 @@ class Monitor:
 
         if any(actual_offer_id not in old_offer_ids for actual_offer_id in actual_offer_ids):
             update = True
-            with open("../assets/old_transfermarket_offers.json", 'w') as json_file:
+            with open(os.path.join(parent_dir, 'assets/old_transfermarket_offers.json'), "w") as json_file:
                 json.dump(actual_offers, json_file, indent=4)
         return update
 

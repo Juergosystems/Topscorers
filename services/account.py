@@ -39,7 +39,7 @@ class Account:
             url = 'https://topscorers.ch/api/user/teams'
             request_response = requests.get(url, headers=self.header).json()
             last_bonus_date = {"last_bonus": dt.now().strftime("%d.%m.%Y")}
-            with open (os.path.join(parent_dir, 'assets/last_bonus.json'), "w") as json_file:
+            with open(os.path.join(parent_dir, 'assets/last_bonus.json'), "w") as json_file:
                 json.dump(last_bonus_date, json_file, indent=4)
             self.last_login_bonus = dt.now().date()
             if request_response["bonus"] is not None:
@@ -312,12 +312,12 @@ if __name__ == '__main__':
     # print(acc.get_game_schedule())
     # print(acc.get_next_round(mode="date"))
     # print(acc.get_next_round(mode="countdown"))
-    print(acc.get_live_lineup())
+    # print(acc.get_live_lineup())
     # print(acc.get_live_results())
     # print(acc.get_transfermarket_status())
     # print(acc.get_transfermarket_offers("buying"))
     # print(acc.get_transfermarket_offers("selling"))
-    # print(acc.get_player_detail(317063))
+    print(acc.get_player_detail(343288))
     # print(acc.get_league_ticker())
     # print(acc.place_bid(98624347, 126735))
     # print(acc.update_bid(98624347,8360345, 127633))

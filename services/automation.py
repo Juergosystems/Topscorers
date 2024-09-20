@@ -90,18 +90,18 @@ class Automation:
     def transfermarket_handler(self, mode="info"):
 
         if (mnt.transfermarket_update()):
-            print(mnt.new_transfermarket_offer_ids)
             score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
-            print(score_table)
 
             if mode == "automated":
                 print("No automated handling implemented yet.")
             else:
-                return
+                topic = "Transfermarket Alert"
+                body = f"There are new interesting player on the market: \n" + "\n".join([f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']}" for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)])
+                tlgm.send_message(topic, body)
 
+                return
         else:
             return
-
 
         return
 
@@ -119,9 +119,9 @@ if __name__ == '__main__':
     # atm.balance_handler(mode="automated")
 
     # atm.lineup_handler(mode="info")
-    atm.lineup_handler(mode="automated")
+    # atm.lineup_handler(mode="automated")
 
-    # atm.transfermarket_handler(mode="automated")
+    atm.transfermarket_handler(mode="info")
     
 
     

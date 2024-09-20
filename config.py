@@ -39,7 +39,7 @@ class Config:
         HEADERS = {
             "content-type": 'application/json'
         }
-        
+
     class nl:
         
         HEADERS = {

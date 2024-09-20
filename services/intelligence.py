@@ -34,7 +34,7 @@ class Intelligence:
             # team_name = player_details["data"]["team"]["name"]
             # is_foreigner = player_details["data"]["is_foreigner"]
             market_value = player_details["data"]["marketvalue"]
-            # market_value_trend = player_details["data"]["marketvalue_trend"]
+            market_value_trend = player_details["data"]["marketvalue_trend"]
             # points = player_details["data"]["points"]
             average_points = player_details["data"]["points_avg"]
             position = player_details["data"]["position_name"]
@@ -51,7 +51,7 @@ class Intelligence:
                 previous_games = previous_season_ep[0]["games"]
                 if player_details["data"]["point_metrics"]:
                     # previous_points = player_details["data"]["point_metrics"][0]["points"]
-                    previous_average_points = player_details["data"]["point_metrics"][0]["points_avg"]
+                    previous_average_points = player_details["data"]["point_metrics"][-1]["points_avg"]
                 previous_goals = previous_season_ep[0]["goals"]
                 previous_assists = previous_season_ep[0]["assist"]
 
@@ -88,9 +88,8 @@ class Intelligence:
                     score = ((((pevious_save_rate * 7000) / previous_games) + weight*(average_points)) / (1+weight))
             
             else:
-
                 if player_details["data"]["point_metrics"]:
-                    score = (((max(previous_average_points - 20, 0) +  weight*(max(average_points - 20, 0))) * 10000) / (1+weight)) / market_value 
+                    score = (((max(previous_average_points - 20, 0) +  weight*(max(average_points - 20, 0))) * 10000) / (1+weight)) / market_value
                 
                 elif position != "Goalie":
                     score = (((max(((previous_goals * 60 + previous_assists * 40) / previous_games) - 20, 0) + weight*(max(average_points - 20, 0))) * 10000) / (1+weight)) / market_value
@@ -103,7 +102,9 @@ class Intelligence:
                     "id": player_id,
                     "name": name,
                     "position": position,
-                    "score": score
+                    "score": score,
+                    "marketValue": market_value,
+                    "marketValueTrend": market_value_trend
             }
 
             score_table.append(scoring_details)
@@ -111,9 +112,9 @@ class Intelligence:
         live_lineup = self._get_live_lineup()
         for item in score_table:
             if item["id"] in live_lineup:
-                item["inLineup"] = True
+                item["inLiveLineup"] = True
             else:
-                item["inLineup"] = False
+                item["inLiveLineup"] = False
 
         return score_table
 
@@ -161,7 +162,7 @@ class Intelligence:
                         player_details[s]["goals"] = player_details[s]["goals"] + (float(last_club_season[i]["regularStats"]["G"] or 0) + float(last_club_season[i]["postseasonStats"]["G"] or 0))
                         player_details[s]["assist"] = player_details[s]["assist"] + (float(last_club_season[i]["regularStats"]["A"] or 0) + float(last_club_season[i]["postseasonStats"]["A"] or 0))
                         player_details[s]["goal_against"] = player_details[s]["goal_against"] + (float(last_club_season[i]["regularStats"]["GA"] or 0) + float(last_club_season[i]["postseasonStats"]["GA"] or 0))
-                        player_details[s]["shots_on_goalie"] = player_details[s]["shots_on_goalie"] + (float(last_club_season[i]["regularStats"]["GA"] or 0) + float(last_club_season[i]["postseasonStats"]["GA"] or 0)) / (1-(float(last_club_season[i]["regularStats"]["SVP"] or 0)))
+                        player_details[s]["shots_on_goalie"] = player_details[s]["shots_on_goalie"] + (float(last_club_season[i]["regularStats"]["GA"] or 0) + float(last_club_season[i]["postseasonStats"]["GA"] or 0)) / (1-(float(last_club_season[i]["regularStats"]["SVP"] or 0) + 0.00000001))
                         player_details[s]["shoot_outs"] = player_details[s]["shoot_outs"] + (float(last_club_season[i]["regularStats"]["SO"] or 0) + float(last_club_season[i]["postseasonStats"]["SO"] or 0) )
                 
                 else:            
@@ -186,7 +187,7 @@ class Intelligence:
                         player_details[s]["goals"] = player_details[s]["goals"] + (float(last_club_season[i]["regularStats"]["G"] or 0))
                         player_details[s]["assist"] = player_details[s]["assist"] + (float(last_club_season[i]["regularStats"]["A"] or 0))
                         player_details[s]["goal_against"] = player_details[s]["goal_against"] + (float(last_club_season[i]["regularStats"]["GA"] or 0))
-                        player_details[s]["shots_on_goalie"] = player_details[s]["shots_on_goalie"] + float(last_club_season[i]["regularStats"]["GA"] or 0)/(1-float(last_club_season[i]["regularStats"]["SVP"] or 0))
+                        player_details[s]["shots_on_goalie"] = player_details[s]["shots_on_goalie"] + float(last_club_season[i]["regularStats"]["GA"] or 0)/(1-(float(last_club_season[i]["regularStats"]["SVP"] or 0) + 0.00000001))
                         player_details[s]["shoot_outs"] = player_details[s]["shoot_outs"] + (float(last_club_season[i]["regularStats"]["SO"] or 0))        
             if player_details[s]["shots_on_goalie"] != 0: 
                 player_details[s]["save_rate"] = 1 - (player_details[s]["goal_against"] / player_details[s]["shots_on_goalie"])
@@ -230,9 +231,9 @@ class Intelligence:
         defencemen = [player for player in score_table if player["position"] == "Defenceman"]
         forwards = [player for player in score_table if player["position"] == "Forward"]
 
-        goalies_sorted = sorted(goalies, key=lambda x: (not x["inLineup"], -x["score"]))
-        defencemen_sorted = sorted(defencemen, key=lambda x: (not x["inLineup"], -x["score"]))
-        forwards_sorted = sorted(forwards, key=lambda x: (not x["inLineup"], -x["score"]))
+        goalies_sorted = sorted(goalies, key=lambda x: (not x["inLiveLineup"], -x["score"]))
+        defencemen_sorted = sorted(defencemen, key=lambda x: (not x["inLiveLineup"], -x["score"]))
+        forwards_sorted = sorted(forwards, key=lambda x: (not x["inLiveLineup"], -x["score"]))
 
         best_goalie_id = [goalies_sorted[0]["id"]] if goalies_sorted else []
         best_defencemen_ids = [player["id"] for player in defencemen_sorted[:6]]
