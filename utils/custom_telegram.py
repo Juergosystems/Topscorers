@@ -122,7 +122,7 @@ class CustomTelegram:
 
 if __name__=='__main__':
 
-    tlgm = Telegram()
+    tlgm = CustomTelegram()
     topic = "Missing Player!"
     body = "You are missing a defender in your roster for tonight's round."
 
