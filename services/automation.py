@@ -91,12 +91,15 @@ class Automation:
 
         if (mnt.transfermarket_update()):
             score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
+            players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
+            if not players_of_interest:
+                return
 
             if mode == "automated":
                 print("No automated handling implemented yet.")
             else:
                 topic = "Transfermarket Alert"
-                body = f"There are new interesting player on the market: \n" + "\n".join([f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']}" for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)])
+                body = f"There are new interesting player on the market: \n" + "\n".join([f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']}" for player in players_of_interest])
                 tlgm.send_message(topic, body)
 
                 return
