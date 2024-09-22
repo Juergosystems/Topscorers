@@ -15,7 +15,7 @@ import json
 from config import Config as cfg
 from utils.logger import logger
 
-class Telegram:
+class CustomTelegram:
 
     def __init__(self):
         try:

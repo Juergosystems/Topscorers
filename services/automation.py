@@ -10,7 +10,7 @@ from config import Config as cfg
 from datetime import datetime as dt
 import json
 
-tlgm = custom_telegram.Telegram()
+tlgm = custom_telegram.CustomTelegram()
 acc = account.Account()
 mnt = monitoring.Monitor()
 intl = intelligence.Intelligence()

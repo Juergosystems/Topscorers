@@ -4,13 +4,13 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
 
 from utils.logger import logger
-from utils import telegram
+from utils import custom_telegram
 from services import account
 from config import Config
 import json
 
 
-tlgm = telegram.Telegram()
+tlgm = custom_telegram.CustomTelegram()
 acc = account.Account()
 
 class Monitor:
