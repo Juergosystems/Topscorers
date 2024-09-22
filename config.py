@@ -1,10 +1,14 @@
 import json
 
-def load_credentials():
-    with open("topscorer_credentials.json", 'r') as file:
+def load_credentials(file):
+    with open(file, 'r') as file:
         return json.load(file)
 
-credentials = load_credentials()
+ts_credentials_file = "topscorer_credentials.json"
+tlgm_credentials_file = "telegram_credentials.json"
+
+ts_credentials = load_credentials(ts_credentials_file)
+tlgm_credentials = load_credentials(tlgm_credentials_file)
 
 class Config:
 
@@ -18,9 +22,9 @@ class Config:
                 'Accept': 'application/json, text/plain, */*'
             }
         
-        USER_ID = credentials['user_id']
-        TEAM_ID = credentials['team_id']
-        LEAGUE_ID = credentials['league_id']
+        USER_ID = ts_credentials['user_id']
+        TEAM_ID = ts_credentials['team_id']
+        LEAGUE_ID = ts_credentials['league_id']
 
     class intl:
         
@@ -33,6 +37,8 @@ class Config:
     class ms:
 
         TELEGRAM_MESSAGE_BLUEPRINT = "*{topic}* \n \n{body}"
+        TELEGRAM_TOKEN = tlgm_credentials["token"]
+        TELEGRAM_CHAT_ID = tlgm_credentials["chatId"]
 
     class ep:
         
