@@ -112,7 +112,7 @@ class CustomTelegram:
         # Starten des Bots
         application.run_polling()
 
-        return 10
+        return
 
 
 

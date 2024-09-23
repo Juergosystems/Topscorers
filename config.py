@@ -32,7 +32,7 @@ class Config:
 
     class atm:
 
-        ALERT_OFFSET = 3600 # time in seconds till the next round to trigger alert
+        ALERT_OFFSET = 1800 # time in seconds till the next round to trigger alert
 
     class ms:
 
