@@ -31,8 +31,13 @@ class Config:
         CURRENT_SEASON_SOCRING_WEIGHT = 5 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
 
     class atm:
-        TRANSFERMARKET_ALERT_OFFSET = 7 * 60 * 60 # time for transfermarket alert before offer expires
-        NEXT_ROUND_ALERT_OFFSET = 1800 # time in seconds till the next round to trigger alert
+        NEXT_ROUND_ALERT_OFFSET = 0.5 * 60 * 60 # time in seconds till the next round to trigger alert
+        TRANSFERMARKET_ALERT_OFFSET = 4 * 60 * 60 # time for transfermarket alert before offer expires
+        TRANSFERMARKET_ALERT_SCORE = 0.8 # only players with a higher score create an alert OR
+        TRANSFERMAKRET_ALERT_TREND = [1] # only players with a market value trend included in the list create an alert OR
+        TRANSFERMAKRET_ALERT_FAVORITE_TEAMS = ["ZSC Lions","EV Zug"] # only players from a specfic team create an alert
+
+
 
     class ms:
 

@@ -12,8 +12,11 @@ sys.path.append(parent_dir)
 
 import requests
 import json
+from services import account
 from config import Config as cfg
 from utils.logger import logger
+
+acc = account.Account()
 
 class CustomTelegram:
 
@@ -22,6 +25,7 @@ class CustomTelegram:
             with open(os.path.join(parent_dir, 'telegram_credentials.json'), 'r') as file:
                 self.credentials = json.load(file)
             self.number_of_bids = None
+            self.job_queue = None
             
         
         except Exception as e:
@@ -36,20 +40,14 @@ class CustomTelegram:
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
 
-    # Funktion zum Beenden des Bots
-    def __stop_bot(self, context):
-        # Beendet den Bot-Prozess
-        context.application.stop_running()
-        context.application.shutdown()
-        print("Bot stopped.")
-
-
     def __stop_bot_with_params(self, context=None):
         async def stop(context=context) -> None:
             # Beendet den Bot-Prozess
+            for key in list(context.bot_data.keys()):
+                await context.bot.delete_message(chat_id=cfg.ms.TELEGRAM_CHAT_ID, message_id=int(key))
             context.application.stop_running()
             context.application.shutdown()
-            print("Bot stopped.")
+            print("Bot stopped as the bid requests were expired.")
         return stop
         
 
@@ -61,7 +59,9 @@ class CustomTelegram:
                 InlineKeyboardButton("No", callback_data='no')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await context.bot.send_message(chat_id=chatId, text=initial_question, reply_markup=reply_markup)
+            sent_message = await context.bot.send_message(chat_id=chatId, text=initial_question, reply_markup=reply_markup)
+            context.bot_data[str(sent_message.message_id)] = context.job.data
+
         return start
 
     # Callback-Handler für die Inline-Button-Auswahl
@@ -69,29 +69,27 @@ class CustomTelegram:
         async def button(update: Update, context) -> None:
             query = update.callback_query
             await query.answer()
-
+            initial_message_ide = str(query.message.message_id)
+            player = context.bot_data[initial_message_ide]
             if query.data == 'yes':
-                sent_message = await query.edit_message_text(text=yes_text)
-                context.user_data['bid_message_id'] = sent_message.message_id
-                print(context.user_data['bid_message_id'])
+                sent_message = await query.edit_message_text(text=yes_text.format(player_name=player["name"]))
+                context.user_data[str(sent_message.message_id)] = player
+
             elif query.data == 'no':
-                await query.edit_message_text(text=no_text)
+                await query.edit_message_text(text=no_text.format(player_name=player["name"]))
                 context.user_data['bid_message_id'] = None
-                self.number_of_bids -= 1
-                if self.number_of_bids == 0:
-                    self.__stop_bot(context)
-                
+                 
         return button
 
     # Nachrichten-Handler für die Eingabe des Gebots
     async def __handle_message(self, update: Update, context) -> None:
-        if update.message.reply_to_message and update.message.reply_to_message.message_id == context.user_data.get('bid_message_id'):
+        if update.message.reply_to_message:
             try:
+                corresponding_message_id = str(update.message.reply_to_message.message_id)
+                player = context.user_data[corresponding_message_id]
                 bid = int(update.message.text)
-                await update.message.reply_text(f'Your bid is: {bid}')
-                self.number_of_bids -= 1
-                if self.number_of_bids == 0:
-                    self.__stop_bot(context)
+                acc.place_bid(offer_id=player["offer_id"], price=bid)
+                await update.message.reply_text(f'Your bid for {player["name"]} is: {bid}')
                 
             except ValueError:
                 await update.message.reply_text('Please provide a valid number for the bid.')
@@ -102,27 +100,22 @@ class CustomTelegram:
 
         initial_questions = []
         for player in alerting_players:
-            initial_questions.append(f"There is a new interesting player on the market: \n" + f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']} \n\nWould you like to bid?")
+            initial_questions.append(f"There is a new interesting player on the market: \n" + f" •  {player['name']}" + f", {player['team']}\n" + f"    {player['marketValue']:,}".replace(",","'") + f" CHF, trend: {player['marketValueTrend']} \n\nWould you like to bid?")
 
-        yes_text = f"What is your bid? Reply to this message with your bid."
-        no_text = "Okay, no bid."
+        yes_text = "What is your bid for {player_name}? Reply to this message with your bid."
+        no_text = "Okay, no bid for {player_name}."
 
-        BOT_LIFETIME = 24*60*60  # in Sekunden
         self.number_of_bids = len(alerting_players)
         application = Application.builder().token(cfg.ms.TELEGRAM_TOKEN).build()
 
-        # Callback-Handler für die Inline-Button-Auswahl
         application.add_handler(CallbackQueryHandler(self.__button_with_params(yes_text=yes_text, no_text=no_text)))
-
-        # Nachrichten-Handler für Geboteingaben
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.__handle_message))
 
-        job_queue = application.job_queue
-        for initial_question in initial_questions:
-            job_queue.run_once(callback=self.__start_with_params(initial_question=initial_question, chatId=cfg.ms.TELEGRAM_CHAT_ID), when=0)
-        job_queue.run_once(callback=self.__stop_bot_with_params(context=None), when=BOT_LIFETIME)  # automatisches abstellen des Bots nach einer gewissen Zeit
+        self.job_queue = application.job_queue
+        for index, player in enumerate(alerting_players):
+            self.job_queue.run_once(callback=self.__start_with_params(initial_question=initial_questions[index], chatId=cfg.ms.TELEGRAM_CHAT_ID), data=player, when=1)
+        self.job_queue.run_once(callback=self.__stop_bot_with_params(context=None), when=cfg.atm.TRANSFERMARKET_ALERT_OFFSET)  # automatisches abstellen des Bots nach einer gewissen Zeit
 
-        # Starten des Bots
         application.run_polling()
 
         return

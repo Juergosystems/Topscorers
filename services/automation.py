@@ -93,44 +93,49 @@ class Automation:
 
         try:
             with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), 'r') as json_file:
-                current_players_of_interest = json.load(json_file)
+                old_players_of_interest = json.load(json_file)
         except FileNotFoundError:
-            current_players_of_interest = []
+            old_players_of_interest = []
 
         if (mnt.transfermarket_update()):
             score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
             # for index, offer_id in enumerate(mnt.new_transfermarket_offer_ids):
             #     score_table[index]["offer_id"] = offer_id
             
-            new_players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
+            # new_players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
             # print(players_of_interest)
 
-            for player in new_players_of_interest:
-                current_players_of_interest.append(player)
+            for player in score_table:
+                old_players_of_interest.append(player)
 
-            with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
-                json.dump(current_players_of_interest, json_file, indent=4)
+            # with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
+            #     json.dump(current_players_of_interest, json_file, indent=4)
 
+        players_of_interest = [player for player in old_players_of_interest if (player['score'] > cfg.atm.TRANSFERMARKET_ALERT_SCORE or player["marketValueTrend"] in cfg.atm.TRANSFERMAKRET_ALERT_TREND or player["team"] in cfg.atm.TRANSFERMAKRET_ALERT_FAVORITE_TEAMS)]
+        
         current_offers = acc.get_transfermarket_offers("buying")
 
-        for player in current_players_of_interest:
+        for player in players_of_interest:
                 for offer in current_offers:
                     if player["id"] == offer["player"]["id"]:
                         player["offer_id"] = offer["id"]
                         player["expires_in"] = offer["expires_in"]
                         break
 
-        alerting_players = [player for player in current_players_of_interest if (not player["expires_in"] or player["expires_in"] <= cfg.atm.TRANSFERMARKET_ALERT_OFFSET)]
+        alerting_players = [player for player in players_of_interest if (not player["expires_in"] or player["expires_in"] <= cfg.atm.TRANSFERMARKET_ALERT_OFFSET)]
+
+        if not alerting_players:
+            return
+        
+        updated_player_of_interests = [player for player in players_of_interest if player not in alerting_players]
+
+        with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
+            json.dump(updated_player_of_interests, json_file, indent=4)
 
         if mode == "automated":
             print("No automated handling implemented yet.")
         else:
             tlgm.send_biding_notification(alerting_players)
-
-        updated_player_of_interests = [player for player in current_players_of_interest if player["id"] not in alerting_players]
-
-        with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
-            json.dump(updated_player_of_interests, json_file, indent=4)
                 
         return
 
