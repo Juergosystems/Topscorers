@@ -9,6 +9,8 @@ from services import account, monitoring, intelligence
 from config import Config as cfg
 from datetime import datetime as dt
 import json
+import threading
+import asyncio
 
 tlgm = custom_telegram.CustomTelegram()
 acc = account.Account()
@@ -71,7 +73,7 @@ class Automation:
         if not players_out and not players_in:
             return
 
-        if (mnt.missing_player_in_the_lineup() or self.count_down <= cfg.atm.ALERT_OFFSET):            
+        if (mnt.missing_player_in_the_lineup() or self.count_down <= cfg.atm.NEXT_ROUND_ALERT_OFFSET):            
             if mode == "automated":
                 acc.update_lineup(recommended_lineup[0])
                 topic = "Lineup Updated!"
@@ -89,22 +91,45 @@ class Automation:
 
     def transfermarket_handler(self, mode="info"):
 
+        try:
+            with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), 'r') as json_file:
+                current_players_of_interest = json.load(json_file)
+        except FileNotFoundError:
+            current_players_of_interest = []
+
         if (mnt.transfermarket_update()):
             score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
-            players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
-            if not players_of_interest:
-                return
+            # for index, offer_id in enumerate(mnt.new_transfermarket_offer_ids):
+            #     score_table[index]["offer_id"] = offer_id
+            
+            new_players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
+            # print(players_of_interest)
 
-            if mode == "automated":
-                print("No automated handling implemented yet.")
-            else:
-                topic = "Transfermarket Alert"
-                body = f"There are new interesting player on the market: \n" + "\n".join([f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']}" for player in players_of_interest])
-                tlgm.send_message(topic, body)
+            for player in new_players_of_interest:
+                current_players_of_interest.append(player)
 
-                return
+            with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
+                json.dump(current_players_of_interest, json_file, indent=4)
+
+        current_offers = acc.get_transfermarket_offers("buying")
+
+        for player in current_players_of_interest:
+                for offer in current_offers:
+                    if player["id"] == offer["player"]["id"]:
+                        player["offer_id"] = offer["id"]
+                        player["expires_in"] = offer["expires_in"]
+                        break
+
+        with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
+            json.dump(current_players_of_interest, json_file, indent=4)
+
+        alerting_players = [player for player in current_players_of_interest if (not player["expires_in"] or player["expires_in"] <= cfg.atm.TRANSFERMARKET_ALERT_OFFSET)]
+
+        if mode == "automated":
+            print("No automated handling implemented yet.")
         else:
-            return
+            tlgm.send_biding_notification(alerting_players)
+                
 
         return
 

@@ -31,7 +31,7 @@ class Intelligence:
 
             # rank = player_details["data"]["rank"]
             # team_id = player_details["data"]["team"]["id"]
-            # team_name = player_details["data"]["team"]["name"]
+            team_name = player_details["data"]["team"]["name"]
             # is_foreigner = player_details["data"]["is_foreigner"]
             market_value = player_details["data"]["marketvalue"]
             market_value_trend = player_details["data"]["marketvalue_trend"]
@@ -101,6 +101,7 @@ class Intelligence:
             scoring_details = {
                     "id": player_id,
                     "name": name,
+                    "team": team_name,
                     "position": position,
                     "score": score,
                     "marketValue": market_value,
@@ -122,14 +123,15 @@ class Intelligence:
     
         player_details = []
 
-        url_search = f'https://autocomplete.eliteprospects.com/all?q={player_name.lower()}&hideNotActiveLeagues=1'
+        url_search = f'https://autocomplete.eliteprospects.com/all?q={player_name.lower()[:22]}&hideNotActiveLeagues=1'
         search_response = requests.get(url_search, headers=cfg.ep.HEADERS).json()
+        # print(player_name)
         eliteprospect_id = search_response[0]["id"]
         url_details = f'https://gql.eliteprospects.com/?operationName=PlayerStatisticDefault&variables={{"player":"{eliteprospect_id}","leagueType":"league","sort":"season"}}&extensions={{"persistedQuery":{{"version":1,"sha256Hash":"922817a06790cfca6ead3f987d2da2a7d5213eca323f574bec51305d9582d602"}}}}'
         eliteprospect_details = requests.get(url_details, headers=cfg.ep.HEADERS).json()
         # print(eliteprospect_details)
         excluded_leagues = ["International", "WC", "WJC-20", "International-Jr"]
-        # print(player_name)
+        
         for s in range(0, len(season_end_year)):
             last_club_season = [edge for edge in eliteprospect_details["data"]["playerStats"]["edges"] if edge["season"]["endYear"] == season_end_year[s] and edge["leagueName"] not in excluded_leagues]
             for i in range(0, len(last_club_season)):

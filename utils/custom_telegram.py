@@ -21,6 +21,8 @@ class CustomTelegram:
         try:
             with open(os.path.join(parent_dir, 'telegram_credentials.json'), 'r') as file:
                 self.credentials = json.load(file)
+            self.number_of_bids = None
+            
         
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
@@ -75,8 +77,9 @@ class CustomTelegram:
             elif query.data == 'no':
                 await query.edit_message_text(text=no_text)
                 context.user_data['bid_message_id'] = None
-                self.__stop_bot(context)
-                print("Bot stopped because 'No' was selected.")
+                self.number_of_bids -= 1
+                if self.number_of_bids == 0:
+                    self.__stop_bot(context)
                 
         return button
 
@@ -86,17 +89,26 @@ class CustomTelegram:
             try:
                 bid = int(update.message.text)
                 await update.message.reply_text(f'Your bid is: {bid}')
-                self.__stop_bot(context)
-                print("Bot stopped after receiving a valid bid.")
+                self.number_of_bids -= 1
+                if self.number_of_bids == 0:
+                    self.__stop_bot(context)
                 
             except ValueError:
                 await update.message.reply_text('Please provide a valid number for the bid.')
         else:
             await update.message.reply_text('Please reply to the bid message to submit your bid.')
                                       
-    def send_biding_request(self, initial_question, yes_text, no_text):
+    def send_biding_notification(self, alerting_players):
 
-        BOT_LIFETIME = 10  # 24 Stunden in Sekunden
+        initial_questions = []
+        for player in alerting_players:
+            initial_questions.append(f"There is a new interesting player on the market: \n" + f" •  {player['name']}" + ", " + f"{player['marketValue']:,}".replace(",","'") + f", trend: {player['marketValueTrend']} \n\nWould you like to bid?")
+
+        yes_text = f"What is your bid? Reply to this message with your bid."
+        no_text = "Okay, no bid."
+
+        BOT_LIFETIME = 24*60*60  # in Sekunden
+        self.number_of_bids = len(alerting_players)
         application = Application.builder().token(cfg.ms.TELEGRAM_TOKEN).build()
 
         # Callback-Handler für die Inline-Button-Auswahl
@@ -106,8 +118,9 @@ class CustomTelegram:
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.__handle_message))
 
         job_queue = application.job_queue
-        job_queue.run_once(callback=self.__start_with_params(initial_question=initial_question, chatId=cfg.ms.TELEGRAM_CHAT_ID), when=0)
-        job_queue.run_once(callback=self.__stop_bot_with_params(context=None), when=24*60*60)  # 24 Stunden Verzögerung
+        for initial_question in initial_questions:
+            job_queue.run_once(callback=self.__start_with_params(initial_question=initial_question, chatId=cfg.ms.TELEGRAM_CHAT_ID), when=0)
+        job_queue.run_once(callback=self.__stop_bot_with_params(context=None), when=BOT_LIFETIME)  # automatisches abstellen des Bots nach einer gewissen Zeit
 
         # Starten des Bots
         application.run_polling()

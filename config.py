@@ -31,8 +31,8 @@ class Config:
         CURRENT_SEASON_SOCRING_WEIGHT = 5 # factor to increase the weight of the current season performance compared to last season in the scoring algorithm
 
     class atm:
-
-        ALERT_OFFSET = 1800 # time in seconds till the next round to trigger alert
+        TRANSFERMARKET_ALERT_OFFSET = 7 * 60 * 60 # time for transfermarket alert before offer expires
+        NEXT_ROUND_ALERT_OFFSET = 1800 # time in seconds till the next round to trigger alert
 
     class ms:
 
