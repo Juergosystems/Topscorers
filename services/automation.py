@@ -120,17 +120,18 @@ class Automation:
                         player["expires_in"] = offer["expires_in"]
                         break
 
-        with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
-            json.dump(current_players_of_interest, json_file, indent=4)
-
         alerting_players = [player for player in current_players_of_interest if (not player["expires_in"] or player["expires_in"] <= cfg.atm.TRANSFERMARKET_ALERT_OFFSET)]
 
         if mode == "automated":
             print("No automated handling implemented yet.")
         else:
             tlgm.send_biding_notification(alerting_players)
-                
 
+        updated_player_of_interests = [player for player in current_players_of_interest if player["id"] not in alerting_players]
+
+        with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
+            json.dump(updated_player_of_interests, json_file, indent=4)
+                
         return
 
 
