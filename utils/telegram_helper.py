@@ -44,7 +44,7 @@ class TelegramHelper:
     def send_biding_request(self, player):
         request_type = "bid"
         try:
-            request_topic = f"There is a new interesting player on the market!" 
+            request_topic = f"Transfermarket Alert!" 
             request_body = f" •  {player['name']}" + f", {player['team']}\n" + f"    {player['marketValue']:,}".replace(",","'") + f" CHF, trend: {player['marketValueTrend']} \n\nWould you like to bid?"
             request_message = cfg.ms.TELEGRAM_MESSAGE_BLUEPRINT.format(topic=request_topic, body=request_body)
             reply_markup_yes =f'{{"answer":"yes", "type":"{request_type}", "offer_id": "{player["offer_id"]}"}}' 
