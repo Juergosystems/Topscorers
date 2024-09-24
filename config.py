@@ -32,7 +32,7 @@ class Config:
 
     class atm:
         NEXT_ROUND_ALERT_OFFSET = 0.5 * 60 * 60 # time in seconds till the next round to trigger alert
-        TRANSFERMARKET_ALERT_OFFSET = 4 * 60 * 60 # time for transfermarket alert before offer expires
+        TRANSFERMARKET_ALERT_OFFSET = 5 * 60 * 60 # time for transfermarket alert before offer expires
         TRANSFERMARKET_ALERT_SCORE = 0.8 # only players with a higher score create an alert OR
         TRANSFERMAKRET_ALERT_TREND = [1] # only players with a market value trend included in the list create an alert OR
         TRANSFERMAKRET_ALERT_FAVORITE_TEAMS = ["ZSC Lions","EV Zug"] # only players from a specfic team create an alert

@@ -9,7 +9,7 @@ from services import account, monitoring
 from config import Config as cfg
 import requests
 from datetime import datetime
-import json
+import time
 
 tlgm = telegram_helper.TelegramHelper()
 acc = account.Account()
@@ -24,8 +24,11 @@ class Intelligence:
     def get_player_scores(self, player_ids, mode="efficiency"):
         score_table = []
         for player_id in player_ids:
+            # print(player_id)
             player_details = acc.get_player_detail(player_id)
-            # print(player_details)
+            time.sleep(3)
+            # if player_details is None:
+            #     print(player_details)
             name = player_details["data"]["firstname"] + " " + player_details["data"]["lastname"]
             previous_season_ep = self._get_elite_procspect_details(name)
 

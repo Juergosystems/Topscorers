@@ -9,8 +9,6 @@ from services import account, monitoring, intelligence
 from config import Config as cfg
 from datetime import datetime as dt
 import json
-import threading
-import asyncio
 
 tlgm = telegram_helper.TelegramHelper()
 acc = account.Account()
@@ -99,17 +97,9 @@ class Automation:
 
         if (mnt.transfermarket_update()):
             score_table = intl.get_player_scores(mnt.new_player_ids, mode="efficiency")
-            # for index, offer_id in enumerate(mnt.new_transfermarket_offer_ids):
-            #     score_table[index]["offer_id"] = offer_id
-            
-            # new_players_of_interest = [player for player in score_table if (player['score'] > 0.8 or player["marketValueTrend"] == 1)]
-            # print(players_of_interest)
 
             for player in score_table:
                 players_of_interest.append(player)
-
-            # with open(os.path.join(parent_dir, 'assets/player_of_interest.json'), "w") as json_file:
-            #     json.dump(current_players_of_interest, json_file, indent=4)
         
         current_offers = acc.get_transfermarket_offers("buying")
 
@@ -122,7 +112,7 @@ class Automation:
                         player["marketValueTrend"] = offer["player"]["marketvalue_trend"]
                         break
         
-        new_players_of_interest = [player for player in players_of_interest if (player['score'] > cfg.atm.TRANSFERMARKET_ALERT_SCORE or player["marketValueTrend"] in cfg.atm.TRANSFERMAKRET_ALERT_TREND or player["team"] in cfg.atm.TRANSFERMAKRET_ALERT_FAVORITE_TEAMS)]
+        new_players_of_interest = [player for player in players_of_interest if ((player["expires_in"]) and (player['score'] > cfg.atm.TRANSFERMARKET_ALERT_SCORE or player["marketValueTrend"] in cfg.atm.TRANSFERMAKRET_ALERT_TREND or player["team"] in cfg.atm.TRANSFERMAKRET_ALERT_FAVORITE_TEAMS))]
         alerting_players = [player for player in new_players_of_interest if (player["expires_in"] <= cfg.atm.TRANSFERMARKET_ALERT_OFFSET)]
 
         if not alerting_players:

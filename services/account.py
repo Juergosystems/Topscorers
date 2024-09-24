@@ -317,7 +317,7 @@ if __name__ == '__main__':
     # print(acc.get_transfermarket_status())
     # print(acc.get_transfermarket_offers("buying"))
     # print(acc.get_transfermarket_offers("selling"))
-    print(acc.get_player_detail(343288))
+    print(acc.get_player_detail(155486))
     # print(acc.get_league_ticker())
     # print(acc.place_bid(98624347, 126735))
     # print(acc.update_bid(98624347,8360345, 127633))
