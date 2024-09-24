@@ -1,11 +1,11 @@
-from utils import custom_telegram, logger
+from utils import logger, telegram_helper
 from services import account, monitoring
 from services import automation
 
 logger.setup_logger()
 
 atm = automation.Automation()
-tlgm = custom_telegram.CustomTelegram()
+tlgm = telegram_helper.TelegramHelper()
 
 try:
     atm.bonus_handler(mode="automated")
