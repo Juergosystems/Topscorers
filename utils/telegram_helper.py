@@ -72,6 +72,7 @@ if __name__=='__main__':
                     "score": 0.9984047753323465,
                     "marketValue": 795885,
                     "marketValueTrend": 1,
+                    "last_market_value_change": 5000,
                     "inLiveLineup": True,
                     # "offer_id": 101468613, 
                     "offer_id": 101651826,
