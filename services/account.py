@@ -231,7 +231,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers'
             body = json.dumps({"price": str(price)})
             request_response = requests.post(url, headers=self.header, data=body)
-            return request_response.text
+            return (request_response.status_code, request_response.text)
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
@@ -241,7 +241,7 @@ class Account:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
             body = json.dumps({"price": str(price)})
             request_response = requests.put(url=url, headers=self.header, data=body)
-            return request_response.text
+            return (request_response.status_code, request_response.text)
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
@@ -250,7 +250,7 @@ class Account:
         try:
             url = f'https://topscorers.ch/api/user/transfers/{offer_id}/offers/{bid_id}'
             request_response = requests.delete(url=url, headers=self.header)
-            return request_response.text
+            return (request_response.status_code, request_response.text)
 
         except Exception as e:
             logger.error(f'Ein Fehler ist aufgetreten: {e}')
@@ -317,11 +317,11 @@ if __name__ == '__main__':
     # print(acc.get_transfermarket_status())
     # print(acc.get_transfermarket_offers("buying"))
     # print(acc.get_transfermarket_offers("selling"))
-    print(acc.get_player_detail(155486))
+    # print(acc.get_player_detail(155486))
     # print(acc.get_league_ticker())
     # print(acc.place_bid(98624347, 126735))
     # print(acc.update_bid(98624347,8360345, 127633))
-    # print(acc.delete_bid(98624347,8360345))
+    # print(acc.delete_bid(101468613,8360345))
     # print(acc.place_offer(310640, 900000))
     # print(acc.update_offer(98915611, 115000))
     # print(acc.delete_offer(98967235))

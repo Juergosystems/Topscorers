@@ -226,7 +226,7 @@ class Intelligence:
         return live_lineup_player_ids  
 
             
-    def get_line_up_reccomendation(self):
+    def get_line_up_reccomendation(self, season_mode="regular"):
         mode="performance"
         suggestion_ids = {"players":{}}
         suggestion_names = {"players":{}}
@@ -246,11 +246,19 @@ class Intelligence:
 
         suggestion_ids['players']['1'] = best_goalie_id[0]
 
-        defencemen_keys = ['2', '3', '7', '8', '12', '13']
+        if season_mode == "playoffs":
+            defencemen_keys = ['2', '3']
+        else:
+            defencemen_keys = ['2', '3', '7', '8', '12', '13']
+        
         for i, key in enumerate(defencemen_keys):
             suggestion_ids['players'][key] = best_defencemen_ids[i]
 
-        forward_keys = ['4', '5', '6', '9', '10', '11', '14', '15', '16']
+        if season_mode == "playoffs":
+            forward_keys = ['4', '5', '6']
+        else:
+            forward_keys = ['4', '5', '6', '9', '10', '11', '14', '15', '16']
+
         for i, key in enumerate(forward_keys):
             suggestion_ids['players'][key] = best_forwards_ids[i]
 
